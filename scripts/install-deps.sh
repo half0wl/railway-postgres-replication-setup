@@ -12,6 +12,10 @@ log_info() {
     echo -e "info[$(date +'%Y-%m-%d %H:%M:%S')] |  ${WHITE}$1${NC}"
 }
 
+log_info_hl() {
+    echo -e "info[$(date +'%Y-%m-%d %H:%M:%S')] |  ${PURPLE}$1${NC}"
+}
+
 log_error() {
     echo -e "err[$(date +'%Y-%m-%d %H:%M:%S')]  |  ${RED}$1${NC}"
 }
@@ -19,6 +23,8 @@ log_error() {
 log_ok() {
     echo -e "ok[$(date +'%Y-%m-%d %H:%M:%S')]   |  ${GREEN}$1${NC}"
 }
+
+log_info_hl "Installing dependencies"
 
 # Detect Postgres major version
 log_info "Detecting PostgreSQL version..."
