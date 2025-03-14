@@ -31,7 +31,7 @@ log_error() {
 }
 
 log_ok() {
-    echo -e "$(date +'%Y-%m-%d %H:%M:%S')   | ${GREEN}$1${NC}"
+    echo -e "$(date +'%Y-%m-%d %H:%M:%S') | ${GREEN}$1${NC}"
 }
 
 log_warn() {
