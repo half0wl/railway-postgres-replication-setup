@@ -214,7 +214,7 @@ if [ "$DRY_RUN" = true ]; then
     log_dry_run "perform clone of primary node with:"
     log_dry_run ""
     log_dry_run "  export PGPASSWORD=\"$PRIMARY_REPMGR_USER_PASSWORD_OBS\""
-    log_dry_run "  su -m postgres -c \"repmgr -h $PRIMARY_PGHOST -p $PRIMARY_PGPORT -f $REPMGR_CONF standby clone --dry-run\""
+    log_dry_run "  su -m postgres -c \"repmgr -h $PRIMARY_PGHOST -p $PRIMARY_PGPORT -u repmgr -f $REPMGR_CONF standby clone --dry-run\""
     log_dry_run ""
 
     # 4. Finish
@@ -255,7 +255,7 @@ EOF
     log_info "Performing clone of primary node..."
     export PGPASSWORD="$PRIMARY_REPMGR_USER_PASSWORD"
     if su -m postgres -c \
-        "repmgr -h $PRIMARY_PGHOST -p $PRIMARY_PGPORT -f $REPMGR_CONF standby clone --dry-run"; then
+        "repmgr -h $PRIMARY_PGHOST -p $PRIMARY_PGPORT -u repmgr -f $REPMGR_CONF standby clone --dry-run"; then
             log_ok "Successfully cloned primary node"
     else
         log_error "Failed to clone primary node"
