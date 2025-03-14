@@ -123,7 +123,9 @@ confirm "Continue?" || {
 log_info ""
 
 REQUIRED_COMMANDS=(\
+    "foobar" \
     "pg_config" \
+    "repmgr" \
     "psql" \
     "sed" \
     "grep" \
@@ -132,22 +134,13 @@ REQUIRED_COMMANDS=(\
 for cmd in "${REQUIRED_COMMANDS[@]}"; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
         log_error "Required cmd '$cmd' not found in PATH"
+        log_error "Please ensure you have completed the dependencies"
+        log_error "installation step before running this script."
+        log_error ""
+        log_error "https://docs.railway.com/tutorials/set-up-postgres-replication"
         exit 1
     fi
 done
-
-# Detect Postgres major version
-log_info "Detecting PostgreSQL version..."
-PG_VERSION_OUTPUT=$(pg_config --version)
-POSTGRES_MAJOR_VERSION=$(\
-    echo "$PG_VERSION_OUTPUT" | sed -E 's/^PostgreSQL ([0-9]+)\..*$/\1/'\
-)
-if [ -z "$POSTGRES_MAJOR_VERSION" ]; then
-    log_error "Failed to detect PostgreSQL major version"
-    exit 1
-fi
-log_ok "  - PostgreSQL version string : $PG_VERSION_OUTPUT"
-log_ok "  - PostgreSQL major version  : $POSTGRES_MAJOR_VERSION"
 
 # Railway Postgres template mounts the volume at `/var/lib/postgresql/data`,
 # so we're going to use that for persistence (binaries, repmgr config, etc.)
@@ -180,31 +173,12 @@ else
     fi
 fi
 
-# Install repmgr for the detected PostgreSQL version
-REPMGR_PACKAGE="postgresql-${POSTGRES_MAJOR_VERSION}-repmgr"
-
-if [ "$DRY_RUN" = true ]; then
-    log_dry_run "apt-get update"
-    log_dry_run "apt-get install -y $REPMGR_PACKAGE"
-else
-    log_info "Installing $REPMGR_PACKAGE..."
-    apt-get update
-    if ! apt-get install -y "$REPMGR_PACKAGE"; then
-        log_error "Failed to install $REPMGR_PACKAGE"
-        exit 1
-    fi
-    if ! command -v repmgr >/dev/null 2>&1; then
-        log_error "Failed to install $REPMGR_PACKAGE"
-        exit 1
-    fi
-    log_ok "Installed $(repmgr --version)"
-fi
-
 # Create replication configuration. If there's an existing replication conf,
 # do nothing
-if grep -q "include 'postgresql.replication.conf'" "$POSTGRESQL_CONF" 2>/dev/null; then
-    log_error "Include directive already exists in '$POSTGRESQL_CONF'. This"
-    log_error "script should only be ran once."
+if grep -q \
+    "include 'postgresql.replication.conf'" "$POSTGRESQL_CONF" 2>/dev/null; then
+        log_error "Include directive already exists in '$POSTGRESQL_CONF'. This"
+        log_error "script should only be ran once."
     exit 1
 fi
 
@@ -342,11 +316,15 @@ EOF
 fi
 
 if [ "$DRY_RUN" = true ]; then
+    log_warn ""
     log_warn "✅ Configuration complete in --dry-run mode. No changes were made"
     log_warn "📢 To apply changes, run without the --dry-run flag"
+    log_warn ""
 else
+    log_ok ""
     log_ok "✅ Configuration complete"
     log_ok "🚀 Please re-deploy your Postgres service at:"
     log_ok "  ${RAILWAY_SERVICE_URL} "
     log_ok "for changes to take effect."
+    log_ok ""
 fi

@@ -24,7 +24,9 @@ log_ok() {
     echo -e "ok[$(date +'%Y-%m-%d %H:%M:%S')]   |  ${GREEN}$1${NC}"
 }
 
+log_info_hl ""
 log_info_hl "Installing dependencies"
+log_info_hl ""
 
 # Detect Postgres major version
 log_info "Detecting PostgreSQL version..."
@@ -42,7 +44,6 @@ log_ok "  - PostgreSQL major version  : $POSTGRES_MAJOR_VERSION"
 # Install repmgr for the detected PostgreSQL version
 REPMGR_PACKAGE="postgresql-${POSTGRES_MAJOR_VERSION}-repmgr"
 
-log_info "Installing $REPMGR_PACKAGE..."
 apt-get update
 if ! apt-get install -y "$REPMGR_PACKAGE"; then
     log_error "Failed to install $REPMGR_PACKAGE"
@@ -56,6 +57,5 @@ log_ok "Installed $(repmgr --version)"
 
 utilities=(curl vim)
 utilities_str=$(printf '%s ' "${utilities[@]}")
-log_info "Installing utilities: $utilities_str"
 apt-get install -y "${utilities[@]}"
 log_ok "Installed utilities: $utilities_str"
