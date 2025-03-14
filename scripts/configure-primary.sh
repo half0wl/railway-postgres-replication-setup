@@ -322,8 +322,13 @@ if [ "$DRY_RUN" = true ]; then
 else
     log_ok ""
     log_ok "✅ Configuration complete"
-    log_ok "🚀 Please re-deploy your Postgres service at:"
+    log_ok "🚀 For changes to take effect, please re-deploy your Postgres service:"
+    log_ok ""
     log_ok "  ${RAILWAY_SERVICE_URL} "
-    log_ok "for changes to take effect."
+    log_ok ""
+    log_ok "After re-deploying, you can proceed with setting up the replica"
+    log_ok "by following the instructions in the documentation:"
+    log_ok ""
+    log_ok "  https://docs.railway.com/tutorials/set-up-postgres-replication#2-configure-the-replica"
     log_ok ""
 fi

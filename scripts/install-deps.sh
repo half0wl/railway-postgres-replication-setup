@@ -55,7 +55,7 @@ if ! command -v repmgr >/dev/null 2>&1; then
 fi
 log_ok "Installed $(repmgr --version)"
 
-utilities=(curl vim)
+utilities=(vim)
 utilities_str=$(printf '%s ' "${utilities[@]}")
 apt-get install -y "${utilities[@]}"
 log_ok "Installed utilities: $utilities_str"
