@@ -178,20 +178,20 @@ log_ok "Found PostgreSQL configuration file at '$POSTGRESQL_CONF'"
 
 # Create Railway runtime dir
 RAILWAY_RUNTIME_DIR="$RAILWAY_VOL_MOUNT_PATH/railway-runtime"
-if [ $DRY_RUN = true ]; then
-    log_dry_run "create directory '$RAILWAY_RUNTIME_DIR'"
-else
-    if [ ! -d "$RAILWAY_RUNTIME_DIR" ]; then
-        mkdir -p "$RAILWAY_RUNTIME_DIR"
-    fi
-fi
-
 REPMGR_DIR="$RAILWAY_RUNTIME_DIR/repmgr"
 REPMGR_CONF="$REPMGR_DIR/repmgr.conf"
 
 if [ "$DRY_RUN" = true ]; then
+    # 0. Create Railway runtime directory
+    log_dry_run "create directory '$RAILWAY_RUNTIME_DIR' with:"
+    log_dry_run ""
+    log_dry_run "  mkdir -p '$RAILWAY_RUNTIME_DIR'"
+    log_dry_run ""
+
     # 1. Create repmgr directory
-    log_dry_run "create directory '$REPMGR_DIR'"
+    log_dry_run "create directory '$REPMGR_DIR' with:"
+    log_dry_run ""
+    log_dry_run "  mkdir -p '$REPMGR_DIR'"
     log_dry_run ""
 
     # 2. Create repmgr configuration file
@@ -208,6 +208,12 @@ if [ "$DRY_RUN" = true ]; then
     log_dry_run ""
     log_dry_run "  su -m postgres -c \"repmgr -h $PRIMARY_PGHOST -p $PRIMARY_PGPORT -f $REPMGR_CONF standby clone --dry-run\""
     log_dry_run ""
+
+    # 4. Finish
+    log_warn ""
+    log_warn "✅ Configuration complete in --dry-run mode. No changes were made"
+    log_warn "📢 To apply changes, run without the --dry-run flag"
+    echo ""
 # -----------------------------------------------------------------------------
 # dryrun end
 # -----------------------------------------------------------------------------
@@ -215,8 +221,13 @@ else
 # -----------------------------------------------------------------------------
 # normal run start
 # -----------------------------------------------------------------------------
+    # 0. Create Railway runtime directory
+    if [ ! -d "$RAILWAY_RUNTIME_DIR" ]; then
+        mkdir -p "$RAILWAY_RUNTIME_DIR"
+    fi
+
     # 1. Create repmgr directory
-    log_info "Setting up repmgr configuration and binary..."
+    log_info "Setting up repmgr configuration..."
     if [ ! -d "$REPMGR_DIR" ]; then
         mkdir -p "$REPMGR_DIR"
     fi
@@ -242,18 +253,12 @@ EOF
         log_error "Failed to clone primary node"
         exit 1
     fi
-fi
 
-if [ "$DRY_RUN" = true ]; then
-    log_warn ""
-    log_warn "✅ Configuration complete in --dry-run mode. No changes were made"
-    log_warn "📢 To apply changes, run without the --dry-run flag"
-    log_warn ""
-else
+    # 4. Finish
     log_ok ""
     log_ok "✅ Configuration complete"
     log_ok "🚀 Please re-deploy your Postgres service at:"
     log_ok "  ${RAILWAY_SERVICE_URL} "
     log_ok "for changes to take effect."
-    log_ok ""
+    echo ""
 fi
