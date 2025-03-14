@@ -163,7 +163,7 @@ fi
 log_ok "Found PostgreSQL configuration file at '$POSTGRESQL_CONF'"
 
 # Create Railway runtime dir
-RAILWAY_RUNTIME_DIR="$RAILWAY_VOL_MOUNT_PATH/railway-runtime/"
+RAILWAY_RUNTIME_DIR="$RAILWAY_VOL_MOUNT_PATH/railway-runtime"
 if [ $DRY_RUN = true ]; then
     log_dry_run "create directory '$RAILWAY_RUNTIME_DIR'"
 else
