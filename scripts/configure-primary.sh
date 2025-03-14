@@ -236,6 +236,15 @@ if [ "$DRY_RUN" = true ]; then
     log_dry_run "register primary node with:"
     log_dry_run ""
     log_dry_run "  su -m postgres -c \"repmgr -f $REPMGR_CONF primary register\""
+
+    # 8. Modify pg_hba.conf
+    PG_HBA_CONF="$PGDATA_DIR/pg_hba.conf"
+    PG_HBA_CONF_BAK="$PGDATA_DIR/pg_hba.conf.bak"
+    log_dry_run "verify last line of '$PG_HBA_CONF' is 'host all all all scram-sha-256'"
+    log_dry_run "back up '$PG_HBA_CONF' to '$PG_HBA_CONF_BAK'"
+    log_dry_run "add the following line before the last line of '$PG_HBA_CONF':"
+    log_dry_run "# Added by Railway on $(date +'%Y-%m-%d %H:%M:%S')"
+    log_dry_run "host replication repmgr ::0/0 trust"
 else
 
     # 1. Create the replication configuration file
@@ -311,6 +320,41 @@ EOF
     else
         log_error "Failed to register primary node with repmgr"
         exit 1
+    fi
+
+    # 8. Modify pg_hba.conf
+    PG_HBA_CONF="$PGDATA_DIR/pg_hba.conf"
+    PG_HBA_CONF_BAK="$PGDATA_DIR/pg_hba.conf.bak"
+
+    log_info "Verifying and modifying pg_hba.conf..."
+
+    # Verify the last line
+    LAST_LINE=$(tail -n 1 "$PG_HBA_CONF")
+    if [ "$LAST_LINE" != "host all all all scram-sha-256" ]; then
+        log_error "The last line of pg_hba.conf is not 'host all all all scram-sha-256'"
+        log_error "Current last line: '$LAST_LINE'"
+        log_error "Skipping pg_hba.conf modification"
+    else
+        # Create backup of pg_hba.conf
+        cp "$PG_HBA_CONF" "$PG_HBA_CONF_BAK"
+        log_ok "Created backup of pg_hba.conf at '$PG_HBA_CONF_BAK'"
+
+        # Create temporary file with the desired content
+        TEMP_FILE=$(mktemp)
+        # Get all lines except the last one
+        head -n -1 "$PG_HBA_CONF" > "$TEMP_FILE"
+        # Add our new line
+        echo "# Added by Railway on $(date +'%Y-%m-%d %H:%M:%S')" >> "$TEMP_FILE"
+        echo "host replication repmgr ::0/0 trust" >> "$TEMP_FILE"
+        # Add the last line back
+        echo "host all all all scram-sha-256" >> "$TEMP_FILE"
+
+        # Replace the original file
+        mv "$TEMP_FILE" "$PG_HBA_CONF"
+        chmod 600 "$PG_HBA_CONF"
+        chown postgres:postgres "$PG_HBA_CONF"
+
+        log_ok "Successfully updated pg_hba.conf with replication access"
     fi
 fi
 
