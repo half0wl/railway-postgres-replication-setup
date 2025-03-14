@@ -83,7 +83,7 @@ done
 RAILWAY_SERVICE_URL="https://railway.app/project/${RAILWAY_PROJECT_ID}/service/${RAILWAY_SERVICE_ID}?environmentId=${RAILWAY_ENVIRONMENT_ID}"
 
 log_info "--------------------------------------------------------------------"
-log_info_hl "|        Railway PostgreSQL Replication Configuration Script              |"
+log_info_hl "|        Railway PostgreSQL Replication Configuration Script        |"
 log_info "--------------------------------------------------------------------"
 log_info ""
 log_info_hl "Before proceeding, please ensure you have read the documentation:"
@@ -123,7 +123,6 @@ confirm "Continue?" || {
 log_info ""
 
 REQUIRED_COMMANDS=(\
-    "foobar" \
     "pg_config" \
     "repmgr" \
     "psql" \
