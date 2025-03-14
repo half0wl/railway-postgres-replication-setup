@@ -55,6 +55,7 @@ fi
 log_ok "Installed $(repmgr --version)"
 
 utilities=(curl vim)
-log_info "Installing utilities: ${utilities[*]}"
+utilities_str=$(printf '%s ' "${utilities[@]}")
+log_info "Installing utilities: $utilities_str"
 apt-get install -y "${utilities[@]}"
-log_ok "Installed utilities: ${utilities[*]}"
+log_ok "Installed utilities: $utilities_str"
